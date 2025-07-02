@@ -68,6 +68,8 @@ handle_error() {
     printf "\r%s [✖] Failed\n" "$3"
     echo "Error: $1"
     echo "Exiting setup. Please fix the issue and retry."
+    # Ensure we stay in rl-swarm with .venv active if possible
+    [ -d rl-swarm/.venv ] && cd rl-swarm && source .venv/bin/activate
     exit 1
 }
 
@@ -148,7 +150,6 @@ yarn install --silent > /dev/null 2>&1 && \
 yarn upgrade --silent > /dev/null 2>&1 && \
 yarn add next@latest viem@latest --silent > /dev/null 2>&1) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
 [ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend. Check modal-login directory and yarn setup." 6 "[6/6] Setting up Python environment and frontend..."
-# No cd .. to stay in rl-swarm with .venv active
 sleep 1
 
 # === Final Output ===
@@ -156,4 +157,7 @@ print_banner
 print_main_progress 6
 echo
 echo "${BOLD}✅ GENSYN SETUP COMPLETE${NC}"
-echo "${BOLD}🛡️ Run inside screen with: screen -S gensyn${NC}"
+echo "${BOLD}🛡️ You are now in rl-swarm with .venv active. Run inside screen with: screen -S gensyn${NC}"
+# Ensure we stay in rl-swarm with .venv active
+cd rl-swarm 2>/dev/null || { echo "Error: rl-swarm directory not found."; exit 1; }
+source .venv/bin/activate 2>/dev/null || { echo "Error: .venv not found. Please check Python virtual environment setup."; exit 1; }
