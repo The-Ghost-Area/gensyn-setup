@@ -151,6 +151,8 @@ yarn upgrade --silent > /dev/null 2>&1 && \
 yarn add next@latest viem@latest --silent > /dev/null 2>&1) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
 [ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend" 6 "[6/6] Setting up Python environment and frontend..."
 cd ..
+&& 
+cd rl-swarm
 sleep 1
 
 # === Final Output ===
