@@ -12,7 +12,7 @@ get_random_color() {
     echo $(tput setaf ${colors[$RANDOM % ${#colors[@]}]})
 }
 
-# === Print banner (persistent) ===
+# === Print banner (persistent, full banner) ===
 print_banner() {
     clear
     echo "$(get_random_color)"
@@ -25,7 +25,6 @@ print_banner() {
     echo "${NC}"
     echo "${BOLD}🔥 GENSYN AUTO SETUP SCRIPT BY DEVIL 🔥${NC}"
 }
-
 
 # === Main progress bar ===
 print_main_progress() {
@@ -108,7 +107,6 @@ sudo apt update -qq && sudo apt install -y -qq nodejs > /dev/null 2>&1 && \
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - > /dev/null 2>&1 && \
 echo "deb https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list > /dev/null && \
 sudo apt update -qq && sudo apt install -y -qq yarn > /dev/null 2>&1) & internal_loader $! "[3/6] Setting up Node.js and Yarn..." 3
-[ $? -22ECapturing stdout/stderr with: > /dev/null 2>&1
 [ $? -eq 0 ] || handle_error "Failed to install Node.js or Yarn" 3 "[3/6] Setting up Node.js and Yarn..."
 sleep 1
 
@@ -117,13 +115,13 @@ print_banner
 print_main_progress 4
 printf "[4/6] Verifying installed versions..."
 (node -v > /dev/null 2>&1 && npm -v > /dev/null 2>&1 && yarn -v > /dev/null 2>&1 && python3 --version > /dev/null 2>&1) & internal_loader $! "[4/6] Verifying installed versions..." 4
-[ $? 0 ] || handle_error "Failed to verify versions" 4 "[4/6] Verifying installed versions..."
+[ $? -eq 0 ] || handle_error "Failed to verify versions" 4 "[4/6] Verifying installed versions..."
 echo "Versions:"
 printf "┌──────────┬──────────┐\n"
-printf "│ Node.js  │ $(node -v) │\n"
-printf "│ npm      │ $(npm -v)  │\n"
-printf "│ Yarn     │ $(yarn -v) │\n"
-printf "│ Python   │ $(python3 --version | cut -d' ' -f2) │\n"
+printf "│ Node.js  │ $(node -v 2>/dev/null || echo "Not installed") │\n"
+printf "│ npm      │ $(npm -v 2>/dev/null || echo "Not installed") │\n"
+printf "│ Yarn     │ $(yarn -v 2>/dev/null || echo "Not installed") │\n"
+printf "│ Python   │ $(python3 --version 2>/dev/null | cut -d' ' -f2 || echo "Not installed") │\n"
 printf "└──────────┴──────────┘\n"
 sleep 2
 
@@ -151,8 +149,6 @@ yarn upgrade --silent > /dev/null 2>&1 && \
 yarn add next@latest viem@latest --silent > /dev/null 2>&1) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
 [ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend" 6 "[6/6] Setting up Python environment and frontend..."
 cd ..
-&& 
-cd rl-swarm
 sleep 1
 
 # === Final Output ===
