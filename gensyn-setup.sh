@@ -68,7 +68,6 @@ handle_error() {
     printf "\r%s [✖] Failed\n" "$3"
     echo "Error: $1"
     echo "Exiting setup. Please fix the issue and retry."
-    cd .. 2>/dev/null || true
     exit 1
 }
 
@@ -126,33 +125,30 @@ printf "│ Python   │ $(python3 --version 2>/dev/null | cut -d' ' -f2 || echo
 printf "└──────────┴──────────┘\n"
 sleep 2
 
-# === Step 5: Clone Gensyn Project and Set Version ===
+# === Step 5: Clone Gensyn Project ===
 print_banner
 print_main_progress 5
-printf "[5/6] Cloning Gensyn AI repository and setting version v0.5.1..."
+printf "[5/6] Cloning Gensyn AI repository..."
 (git clone --quiet https://github.com/gensyn-ai/rl-swarm.git > /dev/null 2>&1 && \
 cd rl-swarm && \
 git reset --hard --quiet && \
 git pull --quiet origin main > /dev/null 2>&1 && \
-git checkout --quiet tags/v0.5.1 > /dev/null 2>&1) & internal_loader $! "[5/6] Cloning Gensyn AI repository and setting version v0.5.1..." 5
-[ $? -eq 0 ] || handle_error "Failed to clone or checkout repository version v0.5.1" 5 "[5/6] Cloning Gensyn AI repository and setting version v0.5.1..."
+git checkout --quiet tags/v0.5.1 > /dev/null 2>&1) & internal_loader $! "[5/6] Cloning Gensyn AI repository..." 5
+[ $? -eq 0 ] || handle_error "Failed to clone or checkout repository" 5 "[5/6] Cloning Gensyn AI repository..."
 sleep 1
 
 # === Step 6: Python Virtual Environment & Frontend Setup ===
 print_banner
 print_main_progress 6
 printf "[6/6] Setting up Python environment and frontend..."
-(python3 -m venv .venv > /dev/null 2>&1 || { echo "Failed to create Python virtual environment"; exit 1; } && \
+(python3 -m venv .venv > /dev/null 2>&1 && \
 source .venv/bin/activate && \
-[ -f requirements.txt ] && pip install -r requirements.txt > /dev/null 2>&1 || echo "No requirements.txt found, skipping Python dependencies" && \
-cd modal-login 2>/dev/null || { echo "Directory modal-login not found. Check if repository was cloned correctly or if tag v0.5.1 contains modal-login."; exit 1; } && \
-[ -f package.json ] || { echo "No package.json found in modal-login. Cannot run yarn commands."; exit 1; } && \
-yarn install --silent > /dev/null 2>&1 || { echo "yarn install failed. Check network or package.json."; exit 1; } && \
-yarn upgrade --silent > /dev/null 2>&1 || { echo "yarn upgrade failed. Check yarn setup."; exit 1; } && \
-yarn add next@latest > /dev/null 2>&1 || { echo "Failed to add next@latest. Check yarn setup."; exit 1; } && \
-yarn add viem@latest > /dev/null 2>&1 || { echo "Failed to add viem@latest. Check yarn setup."; exit 1; }) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
-[ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend. Check requirements.txt, modal-login directory, and yarn setup." 6 "[6/6] Setting up Python environment and frontend..."
-cd .. 2>/dev/null || true
+cd modal-login 2>/dev/null || { echo "Directory modal-login not found. Check if repository was cloned correctly."; exit 1; } && \
+yarn install --silent > /dev/null 2>&1 && \
+yarn upgrade --silent > /dev/null 2>&1 && \
+yarn add next@latest viem@latest --silent > /dev/null 2>&1) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
+[ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend. Check modal-login directory and yarn setup." 6 "[6/6] Setting up Python environment and frontend..."
+cd ..
 sleep 1
 
 # === Final Output ===
