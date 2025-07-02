@@ -1,32 +1,6 @@
 #!/bin/bash
 set -e
 
-# === Matrix Rain Loader (Intro Animation) ===
-matrix_rain() {
-    lines=$(tput lines)
-    cols=$(tput cols)
-    chars=(0 1)
-    for ((i=0; i<100; i++)); do
-        clear
-        for ((y=0; y<lines-2; y++)); do
-            line=""
-            for ((x=0; x<cols; x++)); do
-                r=$((RANDOM % 15))
-                if [ $r -lt 2 ]; then
-                    line+="\033[32m${chars[$RANDOM % 2]}\033[0m"
-                else
-                    line+=" "
-                fi
-            done
-            echo -e "$line"
-        done
-        sleep 0.05
-    done
-    clear
-}
-
-matrix_rain
-
 # === Color and formatting definitions ===
 GREEN=$(tput setaf 2)
 NC=$(tput sgr0)
