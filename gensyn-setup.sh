@@ -143,11 +143,11 @@ print_main_progress 6
 printf "[6/6] Setting up Python environment and frontend..."
 (python3 -m venv .venv > /dev/null 2>&1 && \
 source .venv/bin/activate && \
-cd modal-login 2>/dev/null || { echo "Directory modal-login not found"; exit 1; } && \
+cd modal-login 2>/dev/null || { echo "Directory modal-login not found. Check if repository was cloned correctly."; exit 1; } && \
 yarn install --silent > /dev/null 2>&1 && \
 yarn upgrade --silent > /dev/null 2>&1 && \
 yarn add next@latest viem@latest --silent > /dev/null 2>&1) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
-[ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend" 6 "[6/6] Setting up Python environment and frontend..."
+[ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend. Check modal-login directory and yarn setup." 6 "[6/6] Setting up Python environment and frontend..."
 cd ..
 sleep 1
 
