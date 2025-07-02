@@ -8,11 +8,11 @@ BOLD=$(tput bold)
 
 # === Random color for banner ===
 get_random_color() {
-    colors=(1 2 3 4 5 6) # Red, Green, Yellow, Blue, Magenta, Cyan
+    colors=(1 2 3 4 5 6 9 10 11 12 13 14 21 27 33 39 45 51 81 87 123 129 165 201)
     echo $(tput setaf ${colors[$RANDOM % ${#colors[@]}]})
 }
 
-# === Print banner (persistent) ===
+# === Print banner (persistent, full banner) ===
 print_banner() {
     clear
     echo "$(get_random_color)"
@@ -37,26 +37,27 @@ print_main_progress() {
     echo "Overall Progress: [$bar] $progress%"
 }
 
-# === Internal step progress loader ===
+# === Internal step progress moon loader ===
 internal_loader() {
     local pid=$1
     local message=$2
-    local loaders=("▁▁▁▁▁▁▁" "▃▁▁▁▁▁▁" "▃▃▁▁▁▁▁" "▃▃▃▁▁▁▁" "▃▃▃▃▁▁▁" "▃▃▃▃▃▁▁" "▃▃▃▃▃▃▁" "▃▃▃▃▃▃▃")
+    local step=$3
+    local moon_phases=("🌑" "🌒" "🌓" "🌔" "🌕" "🌖" "🌗" "🌘")
     local i=0
     while [ -d /proc/$pid ]; do
         print_banner
-        print_main_progress $3
-        printf "\r%s [%c]" "$message" "-\\|/" | tr -d '\n' | sed "s/.\{2\}$/${loaders[$i]}/"
-        echo " Progress: ${loaders[$i]}"
-        i=$(( (i + 1) % ${#loaders[@]} ))
+        print_main_progress $step
+        printf "\r%s [%c]" "$message" "-\\|/" | tr -d '\n'
+        echo " Progress: ${moon_phases[$i]}"
+        i=$(( (i + 1) % ${#moon_phases[@]} ))
         sleep 0.2
         tput cuu1
         tput el
     done
     print_banner
-    print_main_progress $3
+    print_main_progress $step
     printf "\r%s [✔] ${GREEN}Done${NC}\n" "$message"
-    echo "Progress: ${loaders[-1]}"
+    echo "Progress: 🌕"
     sleep 1
 }
 
@@ -67,6 +68,7 @@ handle_error() {
     printf "\r%s [✖] Failed\n" "$3"
     echo "Error: $1"
     echo "Exiting setup. Please fix the issue and retry."
+    cd .. 2>/dev/null || true
     exit 1
 }
 
@@ -117,37 +119,40 @@ printf "[4/6] Verifying installed versions..."
 [ $? -eq 0 ] || handle_error "Failed to verify versions" 4 "[4/6] Verifying installed versions..."
 echo "Versions:"
 printf "┌──────────┬──────────┐\n"
-printf "│ Node.js  │ $(node -v) │\n"
-printf "│ npm      │ $(npm -v)  │\n"
-printf "│ Yarn     │ $(yarn -v) │\n"
-printf "│ Python   │ $(python3 --version | cut -d' ' -f2) │\n"
+printf "│ Node.js  │ $(node -v 2>/dev/null || echo "Not installed") │\n"
+printf "│ npm      │ $(npm -v 2>/dev/null || echo "Not installed") │\n"
+printf "│ Yarn     │ $(yarn -v 2>/dev/null || echo "Not installed") │\n"
+printf "│ Python   │ $(python3 --version 2>/dev/null | cut -d' ' -f2 || echo "Not installed") │\n"
 printf "└──────────┴──────────┘\n"
 sleep 2
 
-# === Step 5: Clone Gensyn Project ===
+# === Step 5: Clone Gensyn Project and Set Version ===
 print_banner
 print_main_progress 5
-printf "[5/6] Cloning Gensyn AI repository..."
+printf "[5/6] Cloning Gensyn AI repository and setting version v0.5.1..."
 (git clone --quiet https://github.com/gensyn-ai/rl-swarm.git > /dev/null 2>&1 && \
 cd rl-swarm && \
 git reset --hard --quiet && \
 git pull --quiet origin main > /dev/null 2>&1 && \
-git checkout --quiet tags/v0.5.1 > /dev/null 2>&1) & internal_loader $! "[5/6] Cloning Gensyn AI repository..." 5
-[ $? -eq 0 ] || handle_error "Failed to clone or checkout repository" 5 "[5/6] Cloning Gensyn AI repository..."
+git checkout --quiet tags/v0.5.1 > /dev/null 2>&1) & internal_loader $! "[5/6] Cloning Gensyn AI repository and setting version v0.5.1..." 5
+[ $? -eq 0 ] || handle_error "Failed to clone or checkout repository version v0.5.1" 5 "[5/6] Cloning Gensyn AI repository and setting version v0.5.1..."
 sleep 1
 
 # === Step 6: Python Virtual Environment & Frontend Setup ===
 print_banner
 print_main_progress 6
 printf "[6/6] Setting up Python environment and frontend..."
-(python3 -m venv .venv > /dev/null 2>&1 && \
+(python3 -m venv .venv > /dev/null 2>&1 || { echo "Failed to create Python virtual environment"; exit 1; } && \
 source .venv/bin/activate && \
-cd modal-login 2>/dev/null || { echo "Directory modal-login not found"; exit 1; } && \
-yarn install --silent > /dev/null 2>&1 && \
-yarn upgrade --silent > /dev/null 2>&1 && \
-yarn add next@latest viem@latest --silent > /dev/null 2>&1) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
-[ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend" 6 "[6/6] Setting up Python environment and frontend..."
-cd ..
+[ -f requirements.txt ] && pip install -r requirements.txt > /dev/null 2>&1 || echo "No requirements.txt found, skipping Python dependencies" && \
+cd modal-login 2>/dev/null || { echo "Directory modal-login not found. Check if repository was cloned correctly or if tag v0.5.1 contains modal-login."; exit 1; } && \
+[ -f package.json ] || { echo "No package.json found in modal-login. Cannot run yarn commands."; exit 1; } && \
+yarn install --silent > /dev/null 2>&1 || { echo "yarn install failed. Check network or package.json."; exit 1; } && \
+yarn upgrade --silent > /dev/null 2>&1 || { echo "yarn upgrade failed. Check yarn setup."; exit 1; } && \
+yarn add next@latest > /dev/null 2>&1 || { echo "Failed to add next@latest. Check yarn setup."; exit 1; } && \
+yarn add viem@latest > /dev/null 2>&1 || { echo "Failed to add viem@latest. Check yarn setup."; exit 1; }) & internal_loader $! "[6/6] Setting up Python environment and frontend..." 6
+[ $? -eq 0 ] || handle_error "Failed to set up Python environment or frontend. Check requirements.txt, modal-login directory, and yarn setup." 6 "[6/6] Setting up Python environment and frontend..."
+cd .. 2>/dev/null || true
 sleep 1
 
 # === Final Output ===
