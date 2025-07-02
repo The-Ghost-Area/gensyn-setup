@@ -37,26 +37,27 @@ print_main_progress() {
     echo "Overall Progress: [$bar] $progress%"
 }
 
-# === Internal step progress loader ===
+# === Internal step progress moon loader ===
 internal_loader() {
     local pid=$1
     local message=$2
-    local loaders=("▁▁▁▁▁▁▁" "▃▁▁▁▁▁▁" "▃▃▁▁▁▁▁" "▃▃▃▁▁▁▁" "▃▃▃▃▁▁▁" "▃▃▃▃▃▁▁" "▃▃▃▃▃▃▁" "▃▃▃▃▃▃▃")
+    local step=$3
+    local moon_phases=("🌑" "🌒" "🌓" "🌔" "🌕" "🌖" "🌗" "🌘")
     local i=0
     while [ -d /proc/$pid ]; do
         print_banner
-        print_main_progress $3
-        printf "\r%s [%c]" "$message" "-\\|/" | tr -d '\n' | sed "s/.\{2\}$/${loaders[$i]}/"
-        echo " Progress: ${loaders[$i]}"
-        i=$(( (i + 1) % ${#loaders[@]} ))
+        print_main_progress $step
+        printf "\r%s [%c]" "$message" "-\\|/" | tr -d '\n'
+        echo " Progress: ${moon_phases[$i]}"
+        i=$(( (i + 1) % ${#moon_phases[@]} ))
         sleep 0.2
         tput cuu1
         tput el
     done
     print_banner
-    print_main_progress $3
+    print_main_progress $step
     printf "\r%s [✔] ${GREEN}Done${NC}\n" "$message"
-    echo "Progress: ${loaders[-1]}"
+    echo "Progress: 🌕"
     sleep 1
 }
 
@@ -106,6 +107,7 @@ sudo apt update -qq && sudo apt install -y -qq nodejs > /dev/null 2>&1 && \
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - > /dev/null 2>&1 && \
 echo "deb https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list > /dev/null && \
 sudo apt update -qq && sudo apt install -y -qq yarn > /dev/null 2>&1) & internal_loader $! "[3/6] Setting up Node.js and Yarn..." 3
+[ $? -22ECapturing stdout/stderr with: > /dev/null 2>&1
 [ $? -eq 0 ] || handle_error "Failed to install Node.js or Yarn" 3 "[3/6] Setting up Node.js and Yarn..."
 sleep 1
 
@@ -114,7 +116,7 @@ print_banner
 print_main_progress 4
 printf "[4/6] Verifying installed versions..."
 (node -v > /dev/null 2>&1 && npm -v > /dev/null 2>&1 && yarn -v > /dev/null 2>&1 && python3 --version > /dev/null 2>&1) & internal_loader $! "[4/6] Verifying installed versions..." 4
-[ $? -eq 0 ] || handle_error "Failed to verify versions" 4 "[4/6] Verifying installed versions..."
+[ $? 0 ] || handle_error "Failed to verify versions" 4 "[4/6] Verifying installed versions..."
 echo "Versions:"
 printf "┌──────────┬──────────┐\n"
 printf "│ Node.js  │ $(node -v) │\n"
