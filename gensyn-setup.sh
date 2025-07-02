@@ -8,7 +8,7 @@ BOLD=$(tput bold)
 
 # === Random color for banner ===
 get_random_color() {
-    colors=(1 2 3 4 5 6) # Red, Green, Yellow, Blue, Magenta, Cyan
+    colors=(1 2 3 4 5 6 9 10 11 12 13 14 21 27 33 39 45 51 81 87 123 129 165 201)
     echo $(tput setaf ${colors[$RANDOM % ${#colors[@]}]})
 }
 
@@ -25,6 +25,7 @@ print_banner() {
     echo "${NC}"
     echo "${BOLD}🔥 GENSYN AUTO SETUP SCRIPT BY DEVIL 🔥${NC}"
 }
+
 
 # === Main progress bar ===
 print_main_progress() {
