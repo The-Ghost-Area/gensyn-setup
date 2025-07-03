@@ -156,4 +156,4 @@ print_banner
 print_main_progress 6
 echo
 echo "${BOLD}✅ GENSYN SETUP COMPLETE${NC}"
-echo "${BOLD}🛡️ Run inside screen with: screen -S gensyn${NC}"
+echo "${BOLD}🛡️ DEVIL KO THANKS BOLO${NC}"
