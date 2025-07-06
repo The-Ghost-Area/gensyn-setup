@@ -42,7 +42,7 @@ internal_loader() {
     local pid=$1
     local message=$2
     local step=$3
-    local earth_states=("🌍" "🌎" "🌏" "🌐" "🗺️" "🧭" "⛰️" "🏞️")
+    local earth_states=("🌍" "🌎" "🌏")
     local i=0
     while [ -d /proc/$pid ]; do
         print_banner
