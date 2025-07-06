@@ -42,24 +42,23 @@ internal_loader() {
     local pid=$1
     local message=$2
     local step=$3
-    local earth_states=("🌍" "🌎" "🌏")
+    local earth_spin=("🌍" "🌎" "🌏")
     local i=0
     while [ -d /proc/$pid ]; do
         print_banner
         print_main_progress $step
-        printf "\r%s [%c]" "$message" "-\\|/" | tr -d '\n'
-        echo " Progress: ${earth_states[$i]}"
-        i=$(( (i + 1) % ${#earth_states[@]} ))
+        printf "\r%s %s" "$message" "${earth_spin[$i]}"
+        i=$(( (i + 1) % ${#earth_spin[@]} ))
         sleep 0.2
         tput cuu1
         tput el
     done
     print_banner
     print_main_progress $step
-    printf "\r%s [✔] ${GREEN}Done${NC}\n" "$message"
-    echo "Progress: 🌍"
+    printf "\r%s %s ${GREEN}Done${NC}\n" "$message" "🌍"
     sleep 1
 }
+
 
 
 # === Error handling function ===
