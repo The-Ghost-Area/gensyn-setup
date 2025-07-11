@@ -128,14 +128,20 @@ sleep 2
 # === Step 5: Clone Gensyn Project ===
 print_banner
 print_main_progress 5
+
+# Step message
 printf "[5/6] Cloning Gensyn AI repository..."
-(git clone --quiet https://github.com/gensyn-ai/rl-swarm.git > /dev/null 2>&1 && \
-cd rl-swarm && \
-git reset --hard --quiet && \
-git pull --quiet origin main > /dev/null 2>&1 && \
-git checkout --quiet tags/v0.5.1 > /dev/null 2>&1) & internal_loader $! "[5/6] Cloning Gensyn AI repository..." 5
-[ $? -eq 0 ] || handle_error "Failed to clone or checkout repository" 5 "[5/6] Cloning Gensyn AI repository..."
+
+# Only clone the repository silently, with loader animation
+(
+  git clone --quiet https://github.com/gensyn-ai/rl-swarm.git > /dev/null 2>&1
+) & internal_loader $! "[5/6] Cloning Gensyn AI repository..." 5
+
+# Check if previous command succeeded
+[ $? -eq 0 ] || handle_error "❌ Failed to clone repository" 5 "[5/6] Cloning Gensyn AI repository..."
+
 sleep 1
+
 
 # === Step 6: Python Virtual Environment & Frontend Setup ===
 print_banner
